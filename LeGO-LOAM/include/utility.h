@@ -25,7 +25,7 @@
 
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_datatypes.h>
- 
+
 #include <vector>
 #include <cmath>
 #include <algorithm>
@@ -50,7 +50,9 @@ using namespace std;
 
 typedef pcl::PointXYZI  PointType;
 
-extern const string pointCloudTopic = "/velodyne_points";
+//extern const string pointCloudTopic = "/velodyne_points";
+extern const string pointCloudTopic = "/d_c_d_points";
+//extern const string pointCloudTopic = "/cloud/static";
 extern const string imuTopic = "/imu/data";
 
 // Save pcd
@@ -60,28 +62,28 @@ extern const string fileDirectory = "/tmp/";
 extern const bool useCloudRing = true; // if true, ang_res_y and ang_bottom are not used
 
 // VLP-16
-extern const int N_SCAN = 16;
+/*extern const int N_SCAN = 16;
 extern const int Horizon_SCAN = 1800;
 extern const float ang_res_x = 0.2;
 extern const float ang_res_y = 2.0;
 extern const float ang_bottom = 15.0+0.1;
-extern const int groundScanInd = 7;
+extern const int groundScanInd = 7;*/
 
 // HDL-32E
-// extern const int N_SCAN = 32;
-// extern const int Horizon_SCAN = 1800;
-// extern const float ang_res_x = 360.0/float(Horizon_SCAN);
-// extern const float ang_res_y = 41.33/float(N_SCAN-1);
-// extern const float ang_bottom = 30.67;
-// extern const int groundScanInd = 20;
+ extern const int N_SCAN = 32;
+ extern const int Horizon_SCAN = 1800;
+ extern const float ang_res_x = 360.0/float(Horizon_SCAN);
+ extern const float ang_res_y = 41.33/float(N_SCAN-1);
+ extern const float ang_bottom = 30.67;
+ extern const int groundScanInd = 20;
 
 // VLS-128
-// extern const int N_SCAN = 128;
-// extern const int Horizon_SCAN = 1800;
-// extern const float ang_res_x = 0.2;
-// extern const float ang_res_y = 0.3;
-// extern const float ang_bottom = 25.0;
-// extern const int groundScanInd = 10;
+/* extern const int N_SCAN = 128;
+ extern const int Horizon_SCAN = 1800;
+ extern const float ang_res_x = 0.2;
+ extern const float ang_res_y = 0.3;
+ extern const float ang_bottom = 25.0;
+ extern const int groundScanInd = 10;*/
 
 // Ouster users may need to uncomment line 159 in imageProjection.cpp
 // Usage of Ouster imu data is not fully supported yet (LeGO-LOAM needs 9-DOF IMU), please just publish point cloud data
@@ -136,13 +138,13 @@ extern const float historyKeyframeFitnessScore = 0.3; // the smaller the better 
 extern const float globalMapVisualizationSearchRadius = 500.0; // key frames with in n meters will be visualized
 
 
-struct smoothness_t{ 
+struct smoothness_t{
     float value;
     size_t ind;
 };
 
-struct by_value{ 
-    bool operator()(smoothness_t const &left, smoothness_t const &right) { 
+struct by_value{
+    bool operator()(smoothness_t const &left, smoothness_t const &right) {
         return left.value < right.value;
     }
 };
@@ -158,7 +160,7 @@ struct PointXYZIR
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 } EIGEN_ALIGN16;
 
-POINT_CLOUD_REGISTER_POINT_STRUCT (PointXYZIR,  
+POINT_CLOUD_REGISTER_POINT_STRUCT (PointXYZIR,
                                    (float, x, x) (float, y, y)
                                    (float, z, z) (float, intensity, intensity)
                                    (uint16_t, ring, ring)
