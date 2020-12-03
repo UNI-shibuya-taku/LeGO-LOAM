@@ -1,7 +1,6 @@
 #ifndef _UTILITY_LIDAR_ODOMETRY_H_
 #define _UTILITY_LIDAR_ODOMETRY_H_
 
-
 #include <ros/ros.h>
 
 #include <sensor_msgs/Imu.h>
@@ -50,16 +49,27 @@ using namespace std;
 
 typedef pcl::PointXYZI  PointType;
 
+typedef pcl::PointXYZINormal PointXYZIN;
+typedef pcl::PointCloud<PointXYZIN> CloudXYZIN;
+typedef pcl::PointCloud<PointXYZIN>::Ptr CloudXYZINPtr;
+
+typedef pcl::PointXYZRGB PointXYZRGB;
+typedef pcl::PointCloud<PointXYZRGB> CloudXYZRGB;
+typedef pcl::PointCloud<PointXYZRGB>::Ptr CloudXYZRGBPtr;
+
 //extern const string pointCloudTopic = "/velodyne_points";
+//extern const string pointCloudTopic = "/velodyne_obstacles";
+//extern const string pointCloudTopic = "/lego_points";
 extern const string pointCloudTopic = "/d_c_d_points";
 //extern const string pointCloudTopic = "/cloud/static";
 extern const string imuTopic = "/imu/data";
+//extern const string imuTopic = "/d_c_d/imu/data";
 
 // Save pcd
 extern const string fileDirectory = "/tmp/";
 
 // Using velodyne cloud "ring" channel for image projection (other lidar may have different name for this channel, change "PointXYZIR" below)
-extern const bool useCloudRing = true; // if true, ang_res_y and ang_bottom are not used
+extern const bool useCloudRing = false; // if true, ang_res_y and ang_bottom are not used 本来true
 
 // VLP-16
 /*extern const int N_SCAN = 16;
