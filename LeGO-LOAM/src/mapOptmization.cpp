@@ -71,6 +71,8 @@ private:
     ros::Publisher pubRecentKeyFrames;
     ros::Publisher pubRegisteredCloud;
 
+    ros::Publisher pub_trajectory; // 軌跡記録用
+
     ros::Subscriber subLaserCloudCornerLast;
     ros::Subscriber subLaserCloudSurfLast;
     ros::Subscriber subOutlierCloudLast;
@@ -158,6 +160,7 @@ private:
     pcl::VoxelGrid<PointType> downSizeFilterGlobalMapKeyPoses; // for global map visualization
     pcl::VoxelGrid<PointType> downSizeFilterGlobalMapKeyFrames; // for global map visualization
 
+    nav_msgs::Odometry record_trajectory;
     double timeLaserCloudCornerLast;
     double timeLaserCloudSurfLast;
     double timeLaserOdometry;
@@ -231,9 +234,11 @@ public:
 		parameters.relinearizeSkip = 1;
     	isam = new ISAM2(parameters);
 
-        pubKeyPoses = nh.advertise<sensor_msgs::PointCloud2>("/key_pose_origin", 2);
+        pubKeyPoses = nh.advertise<sensor_msgs::PointCloud2>("/key_pose_origin", 2); // 姿勢
         pubLaserCloudSurround = nh.advertise<sensor_msgs::PointCloud2>("/laser_cloud_surround", 2);
         pubOdomAftMapped = nh.advertise<nav_msgs::Odometry> ("/aft_mapped_to_init", 5);
+
+        pub_trajectory = nh.advertise<nav_msgs::Odometry> ("/trajectory_odom", 5);
 
         subLaserCloudCornerLast = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_corner_last", 2, &mapOptimization::laserCloudCornerLastHandler, this);
         subLaserCloudSurfLast = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf_last", 2, &mapOptimization::laserCloudSurfLastHandler, this);
@@ -1465,6 +1470,7 @@ public:
             cloudKeyPoses3D->points[i].y = isamCurrentEstimate.at<Pose3>(i).translation().z();
             cloudKeyPoses3D->points[i].z = isamCurrentEstimate.at<Pose3>(i).translation().x();
 
+
             cloudKeyPoses6D->points[i].x = cloudKeyPoses3D->points[i].x;
             cloudKeyPoses6D->points[i].y = cloudKeyPoses3D->points[i].y;
             cloudKeyPoses6D->points[i].z = cloudKeyPoses3D->points[i].z;
@@ -1472,7 +1478,6 @@ public:
             cloudKeyPoses6D->points[i].pitch = isamCurrentEstimate.at<Pose3>(i).rotation().yaw();
             cloudKeyPoses6D->points[i].yaw   = isamCurrentEstimate.at<Pose3>(i).rotation().roll();
             }
-
             aLoopIsClosed = false;
         }
     }

@@ -104,7 +104,7 @@ public:
         pubSegmentedCloudPure = nh.advertise<sensor_msgs::PointCloud2> ("/segmented_cloud_pure", 1);
         pubSegmentedCloudInfo = nh.advertise<cloud_msgs::cloud_info> ("/segmented_cloud_info", 1);
         pubOutlierCloud = nh.advertise<sensor_msgs::PointCloud2> ("/outlier_cloud", 1);
-        pub_check_cloud = nh.advertise<sensor_msgs::PointCloud2> ("/check_cloud", 1);
+       // pub_check_cloud = nh.advertise<sensor_msgs::PointCloud2> ("/check_cloud", 1);
 
         nanPoint.x = std::numeric_limits<float>::quiet_NaN();
         nanPoint.y = std::numeric_limits<float>::quiet_NaN();
@@ -298,9 +298,9 @@ public:
             fullInfoCloud->points[index] = thisPoint;
             fullInfoCloud->points[index].intensity = range; // the corresponding range of a point is saved as "intensity"
         }
-        std::cout << "input cloud size  :" << cloudSize << std::endl;
-        fullInfoCloud->header.frame_id = "map"; // rvizで確認用
-        pub_check_cloud.publish(fullInfoCloud);
+//        std::cout << "input cloud size  :" << cloudSize << std::endl;
+//        fullInfoCloud->header.frame_id = "map"; // rvizで確認用
+//        pub_check_cloud.publish(fullInfoCloud);
     }
 
     void groundRemoval(){
