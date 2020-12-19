@@ -240,11 +240,14 @@ public:
 
         pub_trajectory = nh.advertise<nav_msgs::Odometry> ("/trajectory_odom", 5);
 
-        subLaserCloudCornerLast = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_corner_last", 2, &mapOptimization::laserCloudCornerLastHandler, this);
-        subLaserCloudSurfLast = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf_last", 2, &mapOptimization::laserCloudSurfLastHandler, this);
-        subOutlierCloudLast = nh.subscribe<sensor_msgs::PointCloud2>("/outlier_cloud_last", 2, &mapOptimization::laserCloudOutlierLastHandler, this);
-        subLaserOdometry = nh.subscribe<nav_msgs::Odometry>("/laser_odom_to_init", 5, &mapOptimization::laserOdometryHandler, this);
-        subImu = nh.subscribe<sensor_msgs::Imu> (imuTopic, 50, &mapOptimization::imuHandler, this);
+        subLaserCloudCornerLast = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_corner_last", 2, &mapOptimization::laserCloudCornerLastHandler, this); // subをlasercloudcornerlastに格納
+
+        subLaserCloudSurfLast = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf_last", 2, &mapOptimization::laserCloudSurfLastHandler, this); // 格納するだけ
+
+        subOutlierCloudLast = nh.subscribe<sensor_msgs::PointCloud2>("/outlier_cloud_last", 2, &mapOptimization::laserCloudOutlierLastHandler, this); // laserCloudOutlierLastにsubを格納
+
+        subLaserOdometry = nh.subscribe<nav_msgs::Odometry>("/laser_odom_to_init", 5, &mapOptimization::laserOdometryHandler, this); // 格納
+        subImu = nh.subscribe<sensor_msgs::Imu> (imuTopic, 50, &mapOptimization::imuHandler, this); // 格納
 
         pubHistoryKeyFrames = nh.advertise<sensor_msgs::PointCloud2>("/history_cloud", 2);
         pubIcpKeyFrames = nh.advertise<sensor_msgs::PointCloud2>("/corrected_cloud", 2);
@@ -266,6 +269,16 @@ public:
 
         aftMappedTrans.frame_id_ = "/camera_init";
         aftMappedTrans.child_frame_id_ = "/aft_mapped";
+
+        record_trajectory.header.frame_id = "map"; // これ
+       // record_trajectory.header.frame_id = "/vehicle";
+       // record_trajectory.header.frame_id = "camera_init";
+       // record_trajectory.header.frame_id = "camera";
+      //  record_trajectory.header.frame_id = "base_link";
+        record_trajectory.child_frame_id = "groud_truth_odom"; // これ
+       // record_trajectory.child_frame_id = "vehicle";
+       // record_trajectory.child_frame_id = "/velodyne";
+
 
         allocateMemory();
     }
@@ -700,15 +713,18 @@ public:
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudKeyPoses3D, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-            cloudMsgTemp.header.frame_id = "/camera_init";
+            cloudMsgTemp.header.frame_id = "/camera_init"; // !!!!
+           // cloudMsgTemp.header.frame_id = "/map"; // depth
             pubKeyPoses.publish(cloudMsgTemp);
+            pub_trajectory.publish(record_trajectory);
         }
 
         if (pubRecentKeyFrames.getNumSubscribers() != 0){
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*laserCloudSurfFromMapDS, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-            cloudMsgTemp.header.frame_id = "/camera_init";
+            cloudMsgTemp.header.frame_id = "/camera_init"; // !!!!
+           // cloudMsgTemp.header.frame_id = "/map"; // depth
             pubRecentKeyFrames.publish(cloudMsgTemp);
         }
 
@@ -717,12 +733,15 @@ public:
             PointTypePose thisPose6D = trans2PointTypePose(transformTobeMapped);
             *cloudOut += *transformPointCloud(laserCloudCornerLastDS,  &thisPose6D);
             *cloudOut += *transformPointCloud(laserCloudSurfTotalLast, &thisPose6D);
+            std::cout << "cloud out size: " << cloudOut->points.size();
 
             sensor_msgs::PointCloud2 cloudMsgTemp;
             pcl::toROSMsg(*cloudOut, cloudMsgTemp);
             cloudMsgTemp.header.stamp = ros::Time().fromSec(timeLaserOdometry);
-            cloudMsgTemp.header.frame_id = "/camera_init";
+            cloudMsgTemp.header.frame_id = "/camera_init"; // !!!!!
+           // cloudMsgTemp.header.frame_id = "/map"; // depth
             pubRegisteredCloud.publish(cloudMsgTemp);
+            ROS_INFO("registered_cloud publish!!!");
         }
     }
 
@@ -1075,6 +1094,7 @@ public:
         downSizeFilterCorner.setInputCloud(laserCloudCornerLast);
         downSizeFilterCorner.filter(*laserCloudCornerLastDS);
         laserCloudCornerLastDSNum = laserCloudCornerLastDS->points.size();
+        std::cout << "laserCloudCornerLastDS size: " <<  laserCloudCornerLastDS->points.size() << std::endl; // ????
 
         laserCloudSurfLastDS->clear();
         downSizeFilterSurf.setInputCloud(laserCloudSurfLast);
@@ -1354,12 +1374,17 @@ public:
         }
     }
 
-
     void saveKeyFramesAndFactor(){
 
         currentRobotPosPoint.x = transformAftMapped[3];
         currentRobotPosPoint.y = transformAftMapped[4];
         currentRobotPosPoint.z = transformAftMapped[5];
+
+        // new!!! publish!!! ここではない　ここでは軌跡めちゃくちゃだった
+/*        record_trajectory.pose.pose.position.x = transformAftMapped[3];
+        record_trajectory.pose.pose.position.y = transformAftMapped[4];
+        record_trajectory.pose.pose.position.z = transformAftMapped[5];
+        pub_trajectory.publish(record_trajectory);*/
 
         bool saveThisKeyFrame = true;
         if (sqrt((previousRobotPosPoint.x-currentRobotPosPoint.x)*(previousRobotPosPoint.x-currentRobotPosPoint.x)
@@ -1367,8 +1392,6 @@ public:
                 +(previousRobotPosPoint.z-currentRobotPosPoint.z)*(previousRobotPosPoint.z-currentRobotPosPoint.z)) < 0.3){
             saveThisKeyFrame = false;
         }
-
-
 
         if (saveThisKeyFrame == false && !cloudKeyPoses3D->points.empty())
         	return;
@@ -1418,6 +1441,12 @@ public:
         thisPose3D.z = latestEstimate.translation().x();
         thisPose3D.intensity = cloudKeyPoses3D->points.size(); // this can be used as index
         cloudKeyPoses3D->push_back(thisPose3D);
+
+        // new!!! publish!!! こっちが本当 測定はスムーズにしないとずれる
+        record_trajectory.pose.pose.position.x = latestEstimate.translation().x();
+        record_trajectory.pose.pose.position.y = latestEstimate.translation().y();
+        record_trajectory.pose.pose.position.z = latestEstimate.translation().z();
+       // pub_trajectory.publish(record_trajectory);
 
         thisPose6D.x = thisPose3D.x;
         thisPose6D.y = thisPose3D.y;

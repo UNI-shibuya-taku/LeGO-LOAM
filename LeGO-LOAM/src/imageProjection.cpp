@@ -242,7 +242,6 @@ public:
         segMsg.orientationDiff = segMsg.endOrientation - segMsg.startOrientation;
     }
 
-    // ここでだいぶ点が削られる
     void projectPointCloud(){
         // range image projection
         float verticalAngle, horizonAngle, range;
@@ -516,20 +515,23 @@ public:
 
         pcl::toROSMsg(*outlierCloud, laserCloudTemp);
         laserCloudTemp.header.stamp = cloudHeader.stamp;
-        laserCloudTemp.header.frame_id = "base_link";
+       // laserCloudTemp.header.frame_id = "base_link"; !!!!!!d_c_d
+        laserCloudTemp.header.frame_id = "map"; // !!!!depth
         pubOutlierCloud.publish(laserCloudTemp);
         ROS_INFO("after outlierCloud publish");
         // segmented cloud with ground
         pcl::toROSMsg(*segmentedCloud, laserCloudTemp);
         laserCloudTemp.header.stamp = cloudHeader.stamp;
-        laserCloudTemp.header.frame_id = "base_link";
+       // laserCloudTemp.header.frame_id = "base_link"; // !!!!!!!d_c_d
+        laserCloudTemp.header.frame_id = "map"; // !!!depth
         pubSegmentedCloud.publish(laserCloudTemp);
         ROS_INFO("after segmentedCloud publish");
         // projected full cloud
         if (pubFullCloud.getNumSubscribers() != 0){
             pcl::toROSMsg(*fullCloud, laserCloudTemp);
             laserCloudTemp.header.stamp = cloudHeader.stamp;
-            laserCloudTemp.header.frame_id = "base_link";
+           // laserCloudTemp.header.frame_id = "base_link"; // !!!!d_c_d
+            laserCloudTemp.header.frame_id = "map"; // depth!!!!
             pubFullCloud.publish(laserCloudTemp);
             ROS_INFO("after FullCloud publish");
         }
@@ -538,7 +540,8 @@ public:
         if (pubGroundCloud.getNumSubscribers() != 0){
             pcl::toROSMsg(*groundCloud, laserCloudTemp);
             laserCloudTemp.header.stamp = cloudHeader.stamp;
-            laserCloudTemp.header.frame_id = "base_link";
+           // laserCloudTemp.header.frame_id = "base_link"; // d_c_d!!!!!
+            laserCloudTemp.header.frame_id = "map"; // depth
             pubGroundCloud.publish(laserCloudTemp);
             ROS_INFO("after ground publish");
         }
@@ -546,7 +549,8 @@ public:
         if (pubSegmentedCloudPure.getNumSubscribers() != 0){
             pcl::toROSMsg(*segmentedCloudPure, laserCloudTemp);
             laserCloudTemp.header.stamp = cloudHeader.stamp;
-            laserCloudTemp.header.frame_id = "base_link";
+           // laserCloudTemp.header.frame_id = "base_link"; // d_c_d
+            laserCloudTemp.header.frame_id = "map"; // depth
             pubSegmentedCloudPure.publish(laserCloudTemp);
             ROS_INFO("after pure publish");
         }
@@ -554,7 +558,8 @@ public:
         if (pubFullInfoCloud.getNumSubscribers() != 0){
             pcl::toROSMsg(*fullInfoCloud, laserCloudTemp);
             laserCloudTemp.header.stamp = cloudHeader.stamp;
-            laserCloudTemp.header.frame_id = "base_link";
+           // laserCloudTemp.header.frame_id = "base_link"; // d_c_d
+            laserCloudTemp.header.frame_id = "map"; // depth
             pubFullInfoCloud.publish(laserCloudTemp);
             ROS_INFO("after info publish");
         }

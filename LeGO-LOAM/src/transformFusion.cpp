@@ -41,7 +41,7 @@ private:
     ros::Publisher pubLaserOdometry2;
     ros::Subscriber subLaserOdometry;
     ros::Subscriber subOdomAftMapped;
-  
+
 
     nav_msgs::Odometry laserOdometry2;
     tf::StampedTransform laserOdometryTrans2;
@@ -93,10 +93,10 @@ public:
 
     void transformAssociateToMap()
     {
-        float x1 = cos(transformSum[1]) * (transformBefMapped[3] - transformSum[3]) 
+        float x1 = cos(transformSum[1]) * (transformBefMapped[3] - transformSum[3])
                  - sin(transformSum[1]) * (transformBefMapped[5] - transformSum[5]);
         float y1 = transformBefMapped[4] - transformSum[4];
-        float z1 = sin(transformSum[1]) * (transformBefMapped[3] - transformSum[3]) 
+        float z1 = sin(transformSum[1]) * (transformBefMapped[3] - transformSum[3])
                  + cos(transformSum[1]) * (transformBefMapped[5] - transformSum[5]);
 
         float x2 = x1;
@@ -131,7 +131,7 @@ public:
         float srx = -sbcx*(salx*sblx + calx*cblx*salz*sblz + calx*calz*cblx*cblz)
                   - cbcx*sbcy*(calx*calz*(cbly*sblz - cblz*sblx*sbly)
                   - calx*salz*(cbly*cblz + sblx*sbly*sblz) + cblx*salx*sbly)
-                  - cbcx*cbcy*(calx*salz*(cblz*sbly - cbly*sblx*sblz) 
+                  - cbcx*cbcy*(calx*salz*(cblz*sbly - cbly*sblx*sblz)
                   - calx*calz*(sbly*sblz + cbly*cblz*sblx) + cblx*cbly*salx);
         transformMapped[0] = -asin(srx);
 
@@ -147,9 +147,9 @@ public:
                      + (calz*saly - caly*salx*salz)*(cblz*sbly - cbly*sblx*sblz) + calx*caly*cblx*cbly)
                      - cbcx*sbcy*((saly*salz + caly*calz*salx)*(cbly*sblz - cblz*sblx*sbly)
                      + (calz*saly - caly*salx*salz)*(cbly*cblz + sblx*sbly*sblz) - calx*caly*cblx*sbly);
-        transformMapped[1] = atan2(srycrx / cos(transformMapped[0]), 
+        transformMapped[1] = atan2(srycrx / cos(transformMapped[0]),
                                    crycrx / cos(transformMapped[0]));
-        
+
         float srzcrx = (cbcz*sbcy - cbcy*sbcx*sbcz)*(calx*salz*(cblz*sbly - cbly*sblx*sblz)
                      - calx*calz*(sbly*sblz + cbly*cblz*sblx) + cblx*cbly*salx)
                      - (cbcy*cbcz + sbcx*sbcy*sbcz)*(calx*calz*(cbly*sblz - cblz*sblx*sbly)
@@ -160,7 +160,7 @@ public:
                      - (sbcy*sbcz + cbcy*cbcz*sbcx)*(calx*salz*(cblz*sbly - cbly*sblx*sblz)
                      - calx*calz*(sbly*sblz + cbly*cblz*sblx) + cblx*cbly*salx)
                      + cbcx*cbcz*(salx*sblx + calx*cblx*salz*sblz + calx*calz*cblx*cblz);
-        transformMapped[2] = atan2(srzcrx / cos(transformMapped[0]), 
+        transformMapped[2] = atan2(srzcrx / cos(transformMapped[0]),
                                    crzcrx / cos(transformMapped[0]));
 
         x1 = cos(transformMapped[2]) * transformIncre[3] - sin(transformMapped[2]) * transformIncre[4];
@@ -171,10 +171,10 @@ public:
         y2 = cos(transformMapped[0]) * y1 - sin(transformMapped[0]) * z1;
         z2 = sin(transformMapped[0]) * y1 + cos(transformMapped[0]) * z1;
 
-        transformMapped[3] = transformAftMapped[3] 
+        transformMapped[3] = transformAftMapped[3]
                            - (cos(transformMapped[1]) * x2 + sin(transformMapped[1]) * z2);
         transformMapped[4] = transformAftMapped[4] - y2;
-        transformMapped[5] = transformAftMapped[5] 
+        transformMapped[5] = transformAftMapped[5]
                            - (-sin(transformMapped[1]) * x2 + cos(transformMapped[1]) * z2);
     }
 
@@ -243,7 +243,7 @@ public:
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "lego_loam");
-    
+
     TransformFusion TFusion;
 
     ROS_INFO("\033[1;32m---->\033[0m Transform Fusion Started.");
